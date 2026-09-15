@@ -1,0 +1,7 @@
+.firedrill/
+.env
+.env.local
+node_modules/
+data/
+dist/
+.DS_Store

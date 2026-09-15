@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "id": "rate-limit-send",
+  "title": "Gmail send attempts return a rate-limit error",
+  "faults": [
+    { "packageId": "gmail", "faultId": "send-rate-limited" }
+  ]
+}

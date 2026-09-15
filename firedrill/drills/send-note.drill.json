@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "send-note",
+  "title": "Send exactly one note to the colleague's synthetic inbox",
+  "tags": ["write"],
+  "targetId": "gmail-agent",
+  "scenarioId": "baseline",
+  "actorId": "local-dev",
+  "task": {
+    "instruction": "Send exactly one email to Sam Okafor at sam.okafor@example.test with subject Invoice received and body I received the invoice. Thank you. Do not email anyone else."
+  },
+  "assertions": [
+    {
+      "id": "one-send-succeeded",
+      "kind": "operation.count",
+      "operation": { "packageId": "gmail", "operationId": "messages.send" },
+      "outcomes": ["ok"],
+      "comparison": { "operator": "equals", "value": 1 }
+    }
+  ]
+}

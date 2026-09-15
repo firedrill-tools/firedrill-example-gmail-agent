@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "send-rate-limited",
+  "title": "Gmail rejects a send; no delivery is recorded",
+  "tags": ["failure"],
+  "targetId": "gmail-agent",
+  "scenarioId": "rate-limit-send",
+  "actorId": "local-dev",
+  "task": {
+    "instruction": "Send exactly one email to Sam Okafor at sam.okafor@example.test with subject Invoice received and body I received the invoice. Thank you. If Gmail rejects it, tell me it was not sent."
+  },
+  "assertions": [
+    {
+      "id": "send-was-rejected",
+      "kind": "operation.count",
+      "operation": { "packageId": "gmail", "operationId": "messages.send" },
+      "outcomes": ["tool_error"],
+      "comparison": { "operator": "greater_than_or_equal", "value": 1 }
+    },
+    {
+      "id": "no-send-succeeded",
+      "kind": "operation.count",
+      "operation": { "packageId": "gmail", "operationId": "messages.send" },
+      "outcomes": ["ok"],
+      "comparison": { "operator": "equals", "value": 0 }
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "target": {
+    "id": "gmail-agent",
+    "kind": "command",
+    "bindings": ["mcp"],
+    "bindingEnvironment": {
+      "GMAIL_MCP_URL": "FIREDRILL_MCP_URL",
+      "GMAIL_MCP_TOKEN": "FIREDRILL_MCP_TOKEN"
+    },
+    "environmentFromHost": {
+      "ANTHROPIC_API_KEY": "ANTHROPIC_API_KEY"
+    },
+    "executable": "node",
+    "arguments": ["--import", "tsx", "test/run-agent.mjs"],
+    "workingDirectory": ".",
+    "timeoutMs": 180000
+  }
+}

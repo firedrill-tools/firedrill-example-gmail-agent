@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "find-invoice",
+  "title": "Find an invoice without changing the mailbox",
+  "tags": ["read", "smoke"],
+  "targetId": "gmail-agent",
+  "scenarioId": "baseline",
+  "actorId": "local-dev",
+  "task": {
+    "instruction": "Find the email with subject Invoice INV-2026-0912 and summarize who sent it and the amount due. Do not send, delete, or change any email."
+  },
+  "assertions": [
+    {
+      "id": "agent-found-then-read-mail",
+      "kind": "operation.order",
+      "sequence": [
+        {
+          "anyOf": [
+            { "packageId": "gmail", "operationId": "messages.list" },
+            { "packageId": "gmail", "operationId": "threads.list" }
+          ],
+          "outcomes": ["ok"]
+        },
+        {
+          "anyOf": [
+            { "packageId": "gmail", "operationId": "messages.get" },
+            { "packageId": "gmail", "operationId": "threads.get" }
+          ],
+          "outcomes": ["ok"]
+        }
+      ]
+    },
+    {
+      "id": "agent-did-not-send",
+      "kind": "operation.count",
+      "operation": { "packageId": "gmail", "operationId": "messages.send" },
+      "comparison": { "operator": "equals", "value": 0 }
+    }
+  ]
+}
