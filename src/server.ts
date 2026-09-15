@@ -28,7 +28,7 @@ const agent = new GmailAgent(config, store, gmail);
 
 const app = express();
 app.use(express.json({ limit: "256kb" }));
-app.use(express.static(join(root, "public")));
+app.use(express.static(join(root, "web", "dist")));
 
 // ---- status ---------------------------------------------------------------
 
