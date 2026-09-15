@@ -1,9 +1,9 @@
 # Gmail Agent example
 
-A small email assistant built with the Claude Agent SDK. Firedrill gives it a
-stateful synthetic Gmail mailbox over MCP, then checks what the agent actually
-read or changed. The agent uses ordinary MCP configuration; it does not import
-Firedrill.
+A small email assistant built with the Claude Agent SDK and a Vite + React
+interface. Firedrill gives it a stateful synthetic Gmail mailbox over MCP,
+then checks what the agent actually read or changed. The agent uses ordinary
+MCP configuration; it does not import Firedrill.
 
 ## Run the drills
 
@@ -58,16 +58,24 @@ node ../firedrill/packages/cli/dist/bin.js serve
 
 Open the **Gmail** Tool app from the inspector. Its browser UI and MCP/HTTP
 operations share the same synthetic SQLite-backed state. To use this repo's
-standalone chat UI, copy the local MCP URL and token from **Connect agent** into
-a local `.env` based on [`.env.example`](.env.example), then run `npm start`
-in a second terminal and open `http://127.0.0.1:4310`. This app only accepts
-the configured MCP endpoint; it has no connection to a real Gmail account.
+standalone React chat UI, copy the local MCP URL and token from **Connect agent**
+into a local `.env` based on [`.env.example`](.env.example). Run `npm start`
+in a second terminal and open `http://127.0.0.1:4310`. The optional activity
+panel shows the agent's actual Gmail Tool calls; it stays closed until opened.
+This app only accepts the configured MCP endpoint; it has no connection to a
+real Gmail account.
+
+For frontend hot reload, use `npm run dev` instead. Vite serves the React UI
+at `http://127.0.0.1:4311` and proxies `/api` to the local agent server on
+port 4310. `npm run check` typechecks the server and UI and builds the
+production frontend.
 
 ## Where things live
 
 ```text
-src/                         Claude Agent SDK agent, chat server, local action log
-public/                      Standalone chat interface
+src/                         Claude Agent SDK agent, API server, local action log
+web/src/                     Vite + React chat UI and typed API/stream client
+web/index.html                Vite mount point, not hand-written UI markup
 test/run-agent.mjs            Test-side adapter: one MCP endpoint + model key
 firedrill/world.json          Synthetic mailboxes, seed messages, actor access
 firedrill/scenarios/          Baseline and send-failure setup

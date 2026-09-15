@@ -4,4 +4,6 @@
 node_modules/
 data/
 dist/
+web/dist/
+.impeccable/review/
 .DS_Store
