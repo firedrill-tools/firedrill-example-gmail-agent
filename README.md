@@ -7,23 +7,9 @@ MCP configuration; it does not import Firedrill.
 
 ## Run the drills
 
-Clone this repo beside the [Firedrill framework](https://github.com/firedrill-tools/firedrill):
-
-```text
-repositories/
-  firedrill/
-  firedrill-example-gmail-agent/
-```
-
-Node.js 20.19+ is required. Until the framework CLI is published, build its
-checkout first:
+Node.js 20.19+ is required. Install the pinned dependencies:
 
 ```sh
-cd ../firedrill
-pnpm install --frozen-lockfile
-pnpm build
-
-cd ../firedrill-example-gmail-agent
 npm ci
 ```
 
@@ -53,7 +39,7 @@ visible in the report but is not text-graded.
 Run the local Tool and inspector in the foreground:
 
 ```sh
-node ../firedrill/packages/cli/dist/bin.js serve
+npm run serve:tools
 ```
 
 Open the **Gmail** Tool app from the inspector. Its browser UI and MCP/HTTP
@@ -87,7 +73,7 @@ firedrill/targets/            Agent subprocess and credential mapping
 
 The reusable Gmail Tool's operation definitions, behavior, HTTP/MCP endpoints,
 and browser UI live in its independently owned
-[package](https://github.com/firedrill-tools/firedrill-community-tools/tree/main/packages/gmail).
+[package](https://github.com/firedrill-tools/firedrill-tools/tree/main/packages/gmail).
 This project owns only its test data and drills; it does not copy or modify Tool
 behavior. The optional chat server's SQLite file under `data/` is its own action
 log, separate from Firedrill's synthetic mailbox database.
