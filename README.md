@@ -13,6 +13,15 @@ Node.js 20.19+ is required. Install the pinned dependencies:
 npm ci
 ```
 
+These checks need no model key: they validate the world and drills, print the
+build plan, and run the Gmail Tool's own conformance suite.
+
+```sh
+npx firedrill validate
+npx firedrill plan
+npx firedrill tool test gmail
+```
+
 Provide `ANTHROPIC_API_KEY` to this terminal using your normal secret manager.
 The CLI passes that one host variable to the agent process; it never writes the
 key to Firedrill source. Then:
@@ -67,13 +76,14 @@ firedrill/world.json          Synthetic mailboxes, seed messages, actor access
 firedrill/scenarios/          Baseline and send-failure setup
 firedrill/drills/             Tasks and behavioral assertions
 firedrill/targets/            Agent subprocess and credential mapping
-.firedrill-tools/             Pinned Gmail Tool package
+firedrill.json                Project root; loads the pinned Gmail Tool package
 .firedrill/                   Generated worlds, reports, and evidence (ignored)
 ```
 
 The reusable Gmail Tool's operation definitions, behavior, HTTP/MCP endpoints,
 and browser UI live in its independently owned
-[package](https://github.com/firedrill-tools/firedrill-tools/tree/main/packages/gmail).
+[`@firedrill-tools/gmail`](https://www.npmjs.com/package/@firedrill-tools/gmail)
+package, pinned in `package.json`.
 This project owns only its test data and drills; it does not copy or modify Tool
 behavior. The optional chat server's SQLite file under `data/` is its own action
 log, separate from Firedrill's synthetic mailbox database.
