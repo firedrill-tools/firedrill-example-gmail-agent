@@ -3,6 +3,6 @@
   "sourceRoot": "firedrill",
   "world": "world.json",
   "toolPackages": [
-    "@firedrill-tools/tool-gmail"
+    "@firedrill-tools/gmail"
   ]
 }
