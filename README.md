@@ -1,4 +1,21 @@
-# Gmail Agent example
+# Gmail Agent — historical private fixture
+
+> **Retired September 26, 2026.** This repository is retained for internal reference,
+> not as a supported Firedrill quickstart or standalone installation. The pinned
+> local CLI, Tool packages, scripts, and test workflow below describe a historical
+> integration. Do not use them as current setup instructions or publish them as a
+> distributable example. Source, history, and existing license grants are preserved.
+
+For supported setup, use the [Firedrill quickstart](https://docs.firedrill.run/quickstart)
+and your [Firedrill account](https://app.firedrill.run). Firedrill is one account-based
+service. Your agent remains in your own process or CI runner and connects to
+synthetic Tools through the issued connection details.
+
+## Historical implementation reference
+
+The following instructions are preserved only for authorized internal investigation;
+they are not a current product installation path. Do not run agents, model calls,
+or drills without authorization.
 
 A small email assistant built with the Claude Agent SDK and a Vite + React
 interface. Firedrill gives it a stateful synthetic Gmail mailbox over MCP,
