@@ -1,114 +1,31 @@
-# Gmail Agent — historical private fixture
+# Gmail Agent — internal Firedrill CI fixture
 
-> **Retired September 26, 2026.** This repository is retained for internal reference,
-> not as a supported Firedrill quickstart or standalone installation. The pinned
-> local CLI, Tool packages, scripts, and test workflow below describe a historical
-> integration. Do not use them as current setup instructions or publish them as a
-> distributable example. Source, history, and existing license grants are preserved.
+This private repository retains a customer-owned Claude Agent SDK email assistant and its behavioral tests. It is an internal integration fixture, not a supported quickstart. Firedrill runs the synthetic Gmail Tool and evaluates recorded effects; the GitHub runner executes the agent. No local Firedrill runtime or real Gmail account is involved.
 
-For supported setup, use the [Firedrill quickstart](https://docs.firedrill.run/quickstart)
-and your [Firedrill account](https://app.firedrill.run). Firedrill is one account-based
-service. Your agent remains in your own process or CI runner and connects to
-synthetic Tools through the issued connection details.
+The managed CI candidate uses the existing `test/run-agent.mjs` adapter without changing `src/` or `web/src/`. The adapter reads a single invocation from standard input, uses the invocation-scoped MCP endpoint, and writes one result to standard output. `ANTHROPIC_API_KEY` stays in the runner; Firedrill supplies only synthetic Tool access.
 
-## Historical implementation reference
+## Connect this repository before a PR run
 
-The following instructions are preserved only for authorized internal investigation;
-they are not a current product installation path. Do not run agents, model calls,
-or drills without authorization.
+An authorized project owner must install and claim the Firedrill GitHub App for **only this repository**, connect the repository and `firedrill.json` source root to the intended project and environment, and select a current reviewed Gmail Tool artifact. The CLI does not install the App or create the repository binding. See the [pull-request CI guide](https://docs.firedrill.run/guides/pull-request-ci).
 
-A small email assistant built with the Claude Agent SDK and a Vite + React
-interface. Firedrill gives it a stateful synthetic Gmail mailbox over MCP,
-then checks what the agent actually read or changed. The agent uses ordinary
-MCP configuration; it does not import Firedrill.
+Set these GitHub Actions variables from the connected resource identities:
 
-## Run the drills
+- `FIREDRILL_PROJECT_ID`
+- `FIREDRILL_ENVIRONMENT_ID`
+- `FIREDRILL_REPOSITORY_BINDING_ID`
 
-Node.js 20.19+ is required. Install the pinned dependencies:
+Set `ANTHROPIC_API_KEY` as a GitHub Actions secret for the agent. Do not add a long-lived Firedrill credential: the workflow requests short-lived authority using GitHub OIDC. Pull requests from forks skip the managed drill job because they cannot safely receive the provider secret.
 
-```sh
-npm ci
-```
+The workflow checks out the exact PR head (or push) commit, installs Node.js 24 and the pinned `@firedrill-run/cloud@0.1.13` / `@firedrill-run/ci-client@0.1.0` clients, checks the example application, then invokes `firedrill ci run --auth github`. The `default` suite selects `find-invoice`, a read-only task whose checks require an actual Gmail Tool read and prohibit sending. This is a head-revision gate, not a base-versus-head comparison; a comparison would require separately running both authorized revisions. The first PR cannot use the older base revision as a suite baseline because that revision has no managed suite.
 
-These checks need no model key: they validate the world and drills, print the
-build plan, and run the Gmail Tool's own conformance suite.
+Locally, `npm ci`, `npm run check`, and `npx firedrill ci --help` are non-agent preparation checks. They do not establish a passing hosted test. A positive PR gate requires the App connection, exact build admission, a same-repository PR run, the provider key, and retained Results evidence. Do not run the agent or a model call merely to validate this repository's wiring.
 
-```sh
-npx firedrill validate
-npx firedrill plan
-npx firedrill tool test gmail
-```
+## Repository layout
 
-Provide `ANTHROPIC_API_KEY` to this terminal using your normal secret manager.
-The CLI passes that one host variable to the agent process; it never writes the
-key to Firedrill source. Then:
+- `src/` and `web/src/`: customer-owned agent and optional chat UI, unchanged by the CI migration.
+- `test/run-agent.mjs`: the existing non-interactive agent adapter.
+- `firedrill/world.json`, `firedrill/scenarios/`, `firedrill/drills/`, `firedrill/targets/`: synthetic data, tasks, checks, and binding declaration.
+- `firedrill/suites/default.suite.json`: the selected PR check.
+- `firedrill.json`: source root and pinned Gmail Tool package.
 
-```sh
-npm run typecheck
-npm run drills -- find-invoice
-npm run drills -- send-note
-npm run drills -- send-rate-limited
-```
-
-Use `npm run drills` to run all three. Each run gets a fresh synthetic world and
-saves an HTML report under `.firedrill/reports/`. Open
-`.firedrill/reports/index.html` for the full report list. A failed assertion
-exits with code 1.
-
-The invoice drill checks that the agent finds and reads mail without sending
-anything. The note drill checks one successful send. The rate-limit drill
-checks that a rejected send changes no delivery state; its response text is
-visible in the report but is not text-graded.
-
-## Browse the synthetic mailbox
-
-Run the local Tool and inspector in the foreground:
-
-```sh
-npm run serve:tools
-```
-
-Open the **Gmail** Tool app from the inspector. Its browser UI and MCP/HTTP
-operations share the same synthetic SQLite-backed state. To use this repo's
-standalone React chat UI, copy the local MCP URL and token from **Connect agent**
-into a local `.env` based on [`.env.example`](.env.example). Run `npm start`
-in a second terminal and open `http://127.0.0.1:4310`. The optional activity
-panel shows the agent's actual Gmail Tool calls; it stays closed until opened.
-This app only accepts the configured MCP endpoint; it has no connection to a
-real Gmail account.
-
-For frontend hot reload, use `npm run dev` instead. Vite serves the React UI
-at `http://127.0.0.1:4311` and proxies `/api` to the local agent server on
-port 4310. `npm run check` typechecks the server and UI and builds the
-production frontend.
-
-## Where things live
-
-```text
-src/                         Claude Agent SDK agent, API server, local action log
-web/src/                     Vite + React chat UI and typed API/stream client
-web/index.html                Vite mount point, not hand-written UI markup
-test/run-agent.mjs            Test-side adapter: one MCP endpoint + model key
-firedrill/world.json          Synthetic mailboxes, seed messages, actor access
-firedrill/scenarios/          Baseline and send-failure setup
-firedrill/drills/             Tasks and behavioral assertions
-firedrill/targets/            Agent subprocess and credential mapping
-firedrill.json                Project root; loads the pinned Gmail Tool package
-.firedrill/                   Generated worlds, reports, and evidence (ignored)
-```
-
-The reusable Gmail Tool's operation definitions, behavior, HTTP/MCP endpoints,
-and browser UI live in its independently owned
-[`@firedrill-tools/gmail`](https://www.npmjs.com/package/@firedrill-tools/gmail)
-package, pinned in `package.json`.
-This project owns only its test data and drills; it does not copy or modify Tool
-behavior. The optional chat server's SQLite file under `data/` is its own action
-log, separate from Firedrill's synthetic mailbox database.
-
-## Safety
-
-The example does not call the real Gmail API. The Tool package is trusted local
-test code, not a sandbox. Review packages before executing them, and keep
-`.env`, `data/`, and `.firedrill/` out of Git.
-
-Apache-2.0. Copyright Reload Tech Inc.
+The example does not call the real Gmail API. Keep `.env`, `data/`, and `.firedrill/` out of Git. Apache-2.0; copyright Reload Tech Inc.
