@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "id": "default",
+  "title": "Gmail agent pull-request check",
+  "drills": ["find-invoice"],
+  "concurrency": 1,
+  "retries": 0
+}
