@@ -1,0 +1,63 @@
+{
+  "targets": [
+    {
+      "schemaVersion": 1,
+      "target": {
+        "id": "gmail-agent",
+        "kind": "external",
+        "bindings": [
+          "mcp"
+        ],
+        "timeoutMs": 120000
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "schemaVersion": 1,
+      "id": "read-only-mailbox",
+      "actors": [
+        {
+          "id": "test-reader",
+          "grants": [
+            {
+              "packageId": "gmail",
+              "operationId": "messages.list"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "drills": [
+    {
+      "schemaVersion": 1,
+      "id": "list-messages",
+      "title": "List messages without changing the mailbox",
+      "targetId": "gmail-agent",
+      "scenarioId": "read-only-mailbox",
+      "actorId": "test-reader",
+      "task": {
+        "instruction": "List messages in my Gmail mailbox and summarize the listing. Do not open, send, delete or modify messages."
+      },
+      "assertions": [
+        {
+          "id": "messages-listed",
+          "kind": "operation.count",
+          "operation": {
+            "packageId": "gmail",
+            "operationId": "messages.list"
+          },
+          "actorId": "test-reader",
+          "outcomes": [
+            "ok"
+          ],
+          "comparison": {
+            "operator": "greater_than_or_equal",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

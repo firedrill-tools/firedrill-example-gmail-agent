@@ -1,8 +1,0 @@
-{
-  "schemaVersion": 1,
-  "sourceRoot": "firedrill",
-  "world": "world.json",
-  "toolPackages": [
-    "@firedrill-tools/gmail"
-  ]
-}

@@ -1,9 +1,14 @@
 .firedrill/
 .env
 .env.local
+.env.*
+!.env.example
 node_modules/
 data/
 dist/
 web/dist/
 .impeccable/review/
 .DS_Store
+*.pem
+*.key
+*.sqlite*

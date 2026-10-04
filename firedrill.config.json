@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "drillIds": [
+    "list-messages"
+  ],
+  "targets": {
+    "gmail-agent": {
+      "command": "node",
+      "arguments": [
+        "--import",
+        "tsx",
+        "test/run-agent.mjs"
+      ],
+      "bindings": [
+        "mcp"
+      ],
+      "bindingEnvironment": {
+        "GMAIL_MCP_URL": "FIREDRILL_MCP_URL",
+        "GMAIL_MCP_TOKEN": "FIREDRILL_MCP_TOKEN"
+      }
+    }
+  }
+}

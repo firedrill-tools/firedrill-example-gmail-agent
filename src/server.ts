@@ -6,6 +6,7 @@ import { dirname, join } from "node:path";
 import { Store } from "./db.js";
 import { GmailAgent, loadAgentConfig, type AgentEvent } from "./agent.js";
 import { GmailMcpConnection } from "./gmail-mcp.js";
+import { isLocalRequest } from "./local-request.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, "..");
@@ -27,6 +28,17 @@ const gmail = new GmailMcpConnection(process.env.GMAIL_MCP_URL!, process.env.GMA
 const agent = new GmailAgent(config, store, gmail);
 
 const app = express();
+app.disable("x-powered-by");
+app.use((req, res, next) => {
+  if (!isLocalRequest(req.get("host"), req.get("origin"), [port, 4311])) {
+    res.status(403).json({ error: "Only requests from this local example are accepted." });
+    return;
+  }
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("Referrer-Policy", "no-referrer");
+  res.setHeader("X-Frame-Options", "DENY");
+  next();
+});
 app.use(express.json({ limit: "256kb" }));
 app.use(express.static(join(root, "web", "dist")));
 

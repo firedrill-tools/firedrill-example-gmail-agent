@@ -13,9 +13,9 @@
     "dev:web": "vite --config web/vite.config.ts",
     "build:web": "vite build --config web/vite.config.ts",
     "typecheck": "tsc --noEmit && tsc --noEmit -p web/tsconfig.json",
-    "check": "npm run typecheck && npm run build:web",
-    "drills": "firedrill run",
-    "serve:tools": "firedrill serve"
+    "check": "npm run typecheck && npm run build:web && npm run test:adapter",
+    "test:adapter": "node --import tsx --test test/adapter.test.mjs",
+    "drills": "firedrill run --config firedrill.config.json"
   },
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "^0.3.241",
@@ -30,8 +30,7 @@
     "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
-    "@firedrill-run/cli": "1.0.1",
-    "@firedrill-tools/gmail": "0.1.2",
+    "@firedrill-run/cloud": "0.1.15",
     "@types/better-sqlite3": "^7.6.13",
     "@types/express": "^5.0.3",
     "@types/node": "^24.0.0",

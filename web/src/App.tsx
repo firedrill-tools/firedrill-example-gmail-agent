@@ -368,7 +368,7 @@ export default function App() {
             <span>
               {!health
                 ? "Start the agent server with npm start."
-                : "Start Firedrill serve and set this app's GMAIL_MCP_URL and GMAIL_MCP_TOKEN."}
+                : "Check that your Firedrill Gmail Tools are active, then refresh the MCP values in .env using firedrill connect and restart this app."}
             </span>
             <button className="button button-quiet" onClick={() => { void boot(); }}>
               <RefreshCw size={15} />
