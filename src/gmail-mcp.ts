@@ -26,6 +26,7 @@ export class GmailMcpConnection {
   async status(): Promise<GmailConnectionStatus> {
     try {
       const response = await fetch(this.url, {
+        signal: AbortSignal.timeout(10_000),
         method: "POST",
         headers: {
           "Content-Type": "application/json",

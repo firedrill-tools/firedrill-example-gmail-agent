@@ -1,0 +1,37 @@
+name: Firedrill drills
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: firedrill-drills-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  drills:
+    if: >-
+      (github.event_name == 'workflow_dispatch' || vars.FIREDRILL_DRILLS_ENABLED == 'true') &&
+      (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Run the actual agent against isolated synthetic Tools
+        env:
+          FIREDRILL_CREDENTIAL: ${{ secrets.FIREDRILL_CREDENTIAL }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          PROJECT_ID: ${{ vars.FIREDRILL_PROJECT_ID }}
+          SETUP_ID: ${{ vars.FIREDRILL_TEST_SETUP_ID }}
+        run: |
+          test -n "$FIREDRILL_CREDENTIAL" && test -n "$ANTHROPIC_API_KEY" && test -n "$PROJECT_ID" && test -n "$SETUP_ID"
+          npx firedrill run --project "$PROJECT_ID" --setup "$SETUP_ID" --config firedrill.config.json --json

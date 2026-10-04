@@ -17,7 +17,7 @@ export interface AgentConfig {
 }
 
 export function loadAgentConfig(env: NodeJS.ProcessEnv, workDir: string): AgentConfig {
-  const autonomy = (env.AGENT_AUTONOMY ?? "write") as Autonomy;
+  const autonomy = (env.AGENT_AUTONOMY ?? "read") as Autonomy;
   if (!["read", "write", "all"].includes(autonomy)) throw new Error(`AGENT_AUTONOMY must be read, write or all (got ${autonomy})`);
   return {
     model: env.AGENT_MODEL ?? "claude-sonnet-4-5",
@@ -177,15 +177,18 @@ export class GmailAgent {
         }
         const approvalId = randomUUID();
         const decision = await new Promise<"allow" | "deny">((resolve) => {
-          this.pending.set(approvalId, { id: approvalId, conversationId, toolUseId: toolUseID, tool: toolName, category, input, resolve });
-          emit({ type: "approval_required", approvalId, toolUseId: toolUseID, tool: toolName, category, input });
-          const timer = setTimeout(() => {
-            if (this.pending.delete(approvalId)) resolve("deny");
-          }, 5 * 60 * 1000);
-          abort.signal.addEventListener("abort", () => {
+          const finish = (decision: "allow" | "deny") => {
             clearTimeout(timer);
-            if (this.pending.delete(approvalId)) resolve("deny");
-          });
+            abort.signal.removeEventListener("abort", cancel);
+            this.pending.delete(approvalId);
+            resolve(decision);
+          };
+          const cancel = () => finish("deny");
+          const timer = setTimeout(cancel, 5 * 60 * 1000);
+          abort.signal.addEventListener("abort", cancel, { once: true });
+          this.pending.set(approvalId, { id: approvalId, conversationId, toolUseId: toolUseID, tool: toolName, category, input, resolve: finish });
+          emit({ type: "approval_required", approvalId, toolUseId: toolUseID, tool: toolName, category, input });
+          if (abort.signal.aborted) cancel();
         });
         emit({ type: "approval_resolved", approvalId, decision });
         this.store.startAction({ conversationId, toolUseId: toolUseID, tool: toolName, category, input, approval: decision === "allow" ? "user" : "denied" });
