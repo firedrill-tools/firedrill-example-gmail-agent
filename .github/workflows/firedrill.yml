@@ -57,7 +57,7 @@ jobs:
           FIREDRILL_TOKEN: ${{ secrets.FIREDRILL_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           FIREDRILL_CI_PR_NUMBER: ${{ github.event.pull_request.number || '' }}
-          FIREDRILL_EXPECTATION: ${{ inputs.expectation || 'pass' }}
+          FIREDRILL_EXPECTATION: ${{ inputs.expectation || vars.FIREDRILL_VERIFY_EXPECTATION || 'pass' }}
         run: |
           set -euo pipefail
           test -n "$ANTHROPIC_API_KEY" || { echo '::error::Configure ANTHROPIC_API_KEY in protected environment firedrill-ci'; exit 3; }
