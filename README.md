@@ -15,10 +15,10 @@ npx --no-install firedrill init
 npm run firedrill:prepare
 ```
 
-This branch pins the official public Firedrill 2.1.0 client archives in
+This branch pins the official Firedrill 2.1.0 npm clients in
 `package.json` and their integrity in `package-lock.json`. They install like
 ordinary npm dependencies; no private source checkout or Firedrill runtime is
-required. The fixed download path identifies this exact release, not `latest`.
+required. Exact versions keep local and CI execution on the same release.
 
 Preparation acquires the current catalog Gmail release with synthetic starter
 data, saves its exact project-owned build/dataset IDs, and writes two recipes
