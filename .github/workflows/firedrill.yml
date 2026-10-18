@@ -28,8 +28,6 @@ jobs:
     env:
       FIREDRILL_PROJECT_ID: ${{ vars.FIREDRILL_PROJECT_ID }}
       FIREDRILL_ENVIRONMENT_ID: ${{ vars.FIREDRILL_ENVIRONMENT_ID }}
-      FIREDRILL_CI_RESULT_DIRECTORY: ${{ runner.temp }}/firedrill-results-${{ github.run_id }}-${{ github.run_attempt }}
-      FIREDRILL_JOURNAL_DIRECTORY: ${{ runner.temp }}/firedrill-journal-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
@@ -48,6 +46,9 @@ jobs:
         run: |
           set -euo pipefail
           test -n "$FIREDRILL_TOKEN" && test -n "$FIREDRILL_PROJECT_ID" && test -n "$FIREDRILL_ENVIRONMENT_ID"
+          export FIREDRILL_CI_RESULT_DIRECTORY="$RUNNER_TEMP/firedrill-results-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          export FIREDRILL_JOURNAL_DIRECTORY="$RUNNER_TEMP/firedrill-journal-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          printf '%s\n' "FIREDRILL_CI_RESULT_DIRECTORY=$FIREDRILL_CI_RESULT_DIRECTORY" "FIREDRILL_JOURNAL_DIRECTORY=$FIREDRILL_JOURNAL_DIRECTORY" >> "$GITHUB_ENV"
           node --input-type=module -e 'import {mkdirSync} from "node:fs"; mkdirSync(process.env.FIREDRILL_CI_RESULT_DIRECTORY, {mode: 0o700});'
           npm run firedrill:prepare -- --from-env
       - name: Run the actual Gmail agent against isolated synthetic mailboxes
