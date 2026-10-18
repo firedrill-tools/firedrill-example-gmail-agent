@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026-10-14",
+  "name": "Gmail agent — read-only mailbox simulations",
+  "target": {
+    "kind": "command",
+    "argv": ["node", "--import", "tsx", "test/run-agent.mjs"],
+    "metadata": {
+      "schemaVersion": "2026-10-15-target-metadata.1",
+      "resetCoverage": { "applicationDatabase": "customer_managed", "conversationMemory": "customer_managed", "filesystem": "customer_managed", "browserProfile": "not_used", "externalState": "customer_managed" }
+    }
+  },
+  "scenarios": [],
+  "services": [],
+  "configurations": [{ "id": "configured-agent-model", "parameters": {} }],
+  "repetitions": 1,
+  "concurrency": 1,
+  "limits": { "timeoutMs": 180000, "maxRuns": null, "maxOutputBytes": 131072 },
+  "gate": { "requireCompleted": true, "requireExactChecks": true, "minimumLevels": {} }
+}

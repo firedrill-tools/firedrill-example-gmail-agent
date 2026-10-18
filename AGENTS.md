@@ -4,7 +4,10 @@ This repository is a customer-side example for Firedrill. Preserve its Apache-2.
 license and history. The agent runs locally or in the customer's CI; synthetic
 Tools run in Firedrill. Do not embed a Tool implementation or private engine.
 
-Use the published `@firedrill-run/cloud` client. Keep source definitions separate
+Use the official `@firedrill-run/sdk` and `@firedrill-run/cli` clients, pinned
+to the coordinated 2.1.0 npm release. Never substitute a private/local checkout.
+The retired cloud client is not supported.
+Keep source definitions separate
 from the runner command. MCP URLs and credentials are issued for a specific
 case or environment, never constants. Do not load real Gmail credentials.
 

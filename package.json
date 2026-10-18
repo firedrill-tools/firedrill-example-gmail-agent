@@ -5,7 +5,7 @@
   "description": "A Claude Agent SDK email assistant tested against a stateful synthetic Gmail Tool.",
   "type": "module",
   "engines": {
-    "node": ">=20.19"
+    "node": ">=22"
   },
   "scripts": {
     "start": "npm run build:web && tsx src/server.ts",
@@ -15,7 +15,9 @@
     "typecheck": "tsc --noEmit && tsc --noEmit -p web/tsconfig.json",
     "check": "npm run typecheck && npm run build:web && npm run test:adapter",
     "test:adapter": "node --import tsx --test test/adapter.test.mjs",
-    "drills": "firedrill run --config firedrill.config.json"
+    "firedrill:prepare": "node firedrill/prepare.mjs",
+    "simulate": "node firedrill/run.mjs",
+    "simulate:negative": "FIREDRILL_EXPECTATION=deliberate-failure node firedrill/run.mjs"
   },
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "^0.3.241",
@@ -30,7 +32,8 @@
     "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
-    "@firedrill-run/cloud": "0.1.15",
+    "@firedrill-run/cli": "2.1.0",
+    "@firedrill-run/sdk": "2.1.0",
     "@types/better-sqlite3": "^7.6.13",
     "@types/express": "^5.0.3",
     "@types/node": "^24.0.0",

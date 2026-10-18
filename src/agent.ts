@@ -43,7 +43,7 @@ export function gmailToolName(fullName: string): string | null {
 export function classify(fullName: string, _input: Record<string, unknown> = {}): ActionCategory | null {
   const name = gmailToolName(fullName);
   if (!name) return null;
-  const n = name.toUpperCase().replace(/^GMAIL_/, "");
+  const n = name.toUpperCase().replace(/^GMAIL[_.]/, "").replaceAll(".", "_");
   const parts = n.split("_");
   const verb = parts.at(-1) === "MODIFY" || parts.at(-1) === "LIST" || parts.at(-1) === "GET" || parts.at(-1) === "SEND"
     ? parts.at(-1)!

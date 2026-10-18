@@ -1,0 +1,74 @@
+name: Firedrill simulations
+on:
+  workflow_dispatch:
+    inputs:
+      expectation:
+        description: "pass runs normal checks; deliberate-failure demonstrates a deliberately wrong expectation, not an agent defect"
+        type: choice
+        options: [pass, deliberate-failure]
+        default: pass
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: firedrill-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  simulate:
+    if: >-
+      (github.event_name == 'workflow_dispatch' || vars.FIREDRILL_CI_ENABLED == 'true') &&
+      (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+    environment: firedrill-ci
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      FIREDRILL_PROJECT_ID: ${{ vars.FIREDRILL_PROJECT_ID }}
+      FIREDRILL_ENVIRONMENT_ID: ${{ vars.FIREDRILL_ENVIRONMENT_ID }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install the pinned application and Firedrill clients
+        run: npm ci
+      - name: Prepare the pinned synthetic Gmail dataset and private result references
+        env:
+          FIREDRILL_TOKEN: ${{ secrets.FIREDRILL_TOKEN }}
+          FIREDRILL_GMAIL_BUILD_ID: ${{ vars.FIREDRILL_GMAIL_BUILD_ID }}
+          FIREDRILL_GMAIL_DATASET_ID: ${{ vars.FIREDRILL_GMAIL_DATASET_ID }}
+        run: |
+          set -euo pipefail
+          test -n "$FIREDRILL_TOKEN" && test -n "$FIREDRILL_PROJECT_ID" && test -n "$FIREDRILL_ENVIRONMENT_ID"
+          export FIREDRILL_CI_RESULT_DIRECTORY="$RUNNER_TEMP/firedrill-results-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          export FIREDRILL_JOURNAL_DIRECTORY="$RUNNER_TEMP/firedrill-journal-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          printf '%s\n' "FIREDRILL_CI_RESULT_DIRECTORY=$FIREDRILL_CI_RESULT_DIRECTORY" "FIREDRILL_JOURNAL_DIRECTORY=$FIREDRILL_JOURNAL_DIRECTORY" >> "$GITHUB_ENV"
+          node --input-type=module -e 'import {mkdirSync} from "node:fs"; mkdirSync(process.env.FIREDRILL_CI_RESULT_DIRECTORY, {mode: 0o700});'
+          npm run firedrill:prepare -- --from-env
+      - name: Run the actual Gmail agent against isolated synthetic mailboxes
+        id: simulate
+        env:
+          FIREDRILL_TOKEN: ${{ secrets.FIREDRILL_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          FIREDRILL_CI_PR_NUMBER: ${{ github.event.pull_request.number || '' }}
+          FIREDRILL_EXPECTATION: ${{ inputs.expectation || vars.FIREDRILL_VERIFY_EXPECTATION || 'pass' }}
+        run: |
+          set -euo pipefail
+          test -n "$ANTHROPIC_API_KEY" || { echo '::error::Configure ANTHROPIC_API_KEY in protected environment firedrill-ci'; exit 3; }
+          case "$FIREDRILL_EXPECTATION" in pass|deliberate-failure) ;; *) echo '::error::Invalid expectation selection'; exit 2 ;; esac
+          npx --no-install firedrill simulate ".firedrill/recipe.${FIREDRILL_EXPECTATION}.json" --origin ci --non-interactive
+      - name: Publish the CI App check, PR summary and detailed report link
+        if: always() && steps.simulate.outcome != 'skipped'
+        env:
+          FIREDRILL_TOKEN: ${{ secrets.FIREDRILL_TOKEN }}
+          FIREDRILL_CI_REPORT: github_summary
+          FIREDRILL_CI_PR_NUMBER: ${{ github.event.pull_request.number || '' }}
+        run: |
+          set -euo pipefail
+          npx --no-install firedrill ci report --results "$FIREDRILL_CI_RESULT_DIRECTORY" --github-app --require-app --json --non-interactive
