@@ -1,0 +1,22 @@
+[
+  {
+    "id": "list-inbox",
+    "name": "List inbox messages without opening or modifying mail",
+    "input": { "instruction": "List up to five message IDs in my inbox using the Gmail list-messages tool. Use userId me, labelIds [INBOX], and maxResults 5. Briefly summarize the listing. Do not open, send, delete or modify any messages." },
+    "checks": [
+      { "id": "gmail-list-observed", "description": "Firedrill recorded at least one actual Gmail message-list operation", "source": { "schemaVersion": "2026-10-15-effect-check.1", "kind": "service_activity", "service": "gmail", "where": { "path": "/invocation/operation/operationId", "equals": "messages.list" } }, "path": "/count", "comparator": "gte", "expected": 1 },
+      { "id": "gmail-list-succeeded", "description": "The recorded Gmail list operation succeeded", "source": { "schemaVersion": "2026-10-15-effect-check.1", "kind": "service_activity", "service": "gmail", "where": { "path": "/invocation/operation/operationId", "equals": "messages.list" } }, "path": "/items/0/outcome/status", "comparator": "equals", "expected": "ok" },
+      { "id": "agent-replied", "description": "The actual assistant produced a nonempty reply; wording is not compared exactly", "path": "/output/replyCharacters", "comparator": "gte", "expected": 1 }
+    ]
+  },
+  {
+    "id": "list-unread",
+    "name": "List unread messages in a separate seeded mailbox instance",
+    "input": { "instruction": "Use the Gmail list-messages tool to find up to five unread messages, using userId me, q is:unread, and maxResults 5. Return a brief summary of the IDs found. Do not open, send, delete or modify messages." },
+    "checks": [
+      { "id": "gmail-list-observed", "description": "Firedrill recorded at least one actual Gmail message-list operation", "source": { "schemaVersion": "2026-10-15-effect-check.1", "kind": "service_activity", "service": "gmail", "where": { "path": "/invocation/operation/operationId", "equals": "messages.list" } }, "path": "/count", "comparator": "gte", "expected": 1 },
+      { "id": "gmail-list-succeeded", "description": "The recorded Gmail list operation succeeded", "source": { "schemaVersion": "2026-10-15-effect-check.1", "kind": "service_activity", "service": "gmail", "where": { "path": "/invocation/operation/operationId", "equals": "messages.list" } }, "path": "/items/0/outcome/status", "comparator": "equals", "expected": "ok" },
+      { "id": "agent-replied", "description": "The actual assistant produced a nonempty reply; wording is not compared exactly", "path": "/output/replyCharacters", "comparator": "gte", "expected": 1 }
+    ]
+  }
+]

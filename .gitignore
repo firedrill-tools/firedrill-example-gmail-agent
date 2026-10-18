@@ -1,4 +1,5 @@
 .firedrill/
+firedrill.config.json
 .env
 .env.local
 .env.*
